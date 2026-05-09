@@ -70,7 +70,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/
 COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
-EXPOSE 8080
+EXPOSE 8090
 
 # Use startup by default
 CMD ["/usr/local/bin/start.sh"]

@@ -8,7 +8,7 @@ services:
         container_name: kelola-dapur
         restart: unless-stopped
         ports:
-            - "8080:8080"
+            - "8090:8090"
         volumes:
             - ../../storage:/app/storage:cached
             - ../../bootstrap/cache:/app/bootstrap/cache:cached
