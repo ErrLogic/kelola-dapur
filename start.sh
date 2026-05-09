@@ -3,7 +3,7 @@ set -e
 
 cd /app
 
-echo "=== Kelola Service Booting Process ==="
+echo "=== Kelola Dapur Service Booting Process ==="
 
 # Ensure necessary directories and permissions
 echo "[Permission] Setting up directories permission..."
