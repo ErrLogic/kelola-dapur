@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-app-bg: #f7f3ee;
+    --color-app-surface: #ffffff;
+    --color-app-soft: #f2ece5;
+    --color-app-ink: #1f1a17;
+    --color-app-muted: #8a7f76;
+    --color-app-accent: #b56a32;
+}
+
+@layer base {
+    html {
+        background: var(--color-app-bg);
+        color: var(--color-app-ink);
+        text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        overscroll-behavior-y: none;
+    }
+
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        background:
+            radial-gradient(circle at top, rgba(255, 255, 255, 0.86), transparent 28%),
+            linear-gradient(180deg, #fbf8f4 0%, #f7f3ee 100%);
+    }
+
+    button,
+    [type='button'],
+    [type='submit'],
+    [role='button'],
+    a {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    textarea,
+    input,
+    select {
+        font: inherit;
+    }
+}
+
+@layer components {
+    .panel-card {
+        @apply rounded-[1.75rem] border border-white/70 bg-white/90 p-4 shadow-[0_8px_30px_rgba(28,25,23,0.06)];
+    }
+
+    .field-label {
+        @apply mb-2 block text-xs font-medium uppercase tracking-[0.18em] text-stone-400;
+    }
+
+    .field-input {
+        @apply min-h-12 w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 shadow-sm shadow-stone-100/70 outline-none transition placeholder:text-stone-300 focus:border-amber-300 focus:ring-4 focus:ring-amber-100/70;
+    }
+
+    .field-input-error {
+        @apply border-red-300 ring-4 ring-red-100/70 focus:border-red-300 focus:ring-red-100/80;
+    }
+
+    .field-error {
+        @apply mt-2 text-xs font-medium text-red-500;
+    }
+
+    .eyebrow {
+        @apply text-[11px] font-medium uppercase tracking-[0.22em] text-stone-400;
+    }
+
+    .icon-btn {
+        @apply inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white text-stone-400 shadow-sm shadow-stone-200/70 transition active:scale-[0.97] active:bg-stone-100 disabled:pointer-events-none disabled:opacity-35;
+    }
+
+    .sheet-panel {
+        @apply border border-white/70 bg-white/95 shadow-[0_-12px_40px_rgba(28,25,23,0.14)];
+    }
+}
+
+@layer utilities {
+    .scrollbar-hide {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+}

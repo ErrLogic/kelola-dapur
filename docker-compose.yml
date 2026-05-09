@@ -1,0 +1,20 @@
+name: kelola
+services:
+    kelola:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: kelola:latest
+        container_name: kelola
+        restart: unless-stopped
+        ports:
+            - "8080:8080"
+        volumes:
+            - ../../storage:/app/storage:cached
+            - ../../bootstrap/cache:/app/bootstrap/cache:cached
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        networks:
+            - kelola
+networks:
+    kelola:
