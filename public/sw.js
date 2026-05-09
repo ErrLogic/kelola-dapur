@@ -36,6 +36,6 @@ self.addEventListener('fetch', (event) => {
 
     // For static assets: cache-first strategy
     event.respondWith(
-        caches.match(event.request).then((cached) => cached || fetch(event.request))
+        fetch(event.request).catch(() => caches.match(event.request))
     );
 });
