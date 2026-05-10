@@ -69,7 +69,7 @@
         {{-- Hero Image --}}
         @if($recipe->image_url)
             <div class="aspect-[16/10] bg-stone-100 overflow-hidden">
-                <img src="{{ str_starts_with($recipe->image_url, 'http') ? $recipe->image_url : $this->getImageUrl() }}"
+                <img src="{{ $this->getImageUrl() }}"
                      alt="{{ $recipe->name }}"
                      class="w-full h-full object-cover"
                      loading="lazy">

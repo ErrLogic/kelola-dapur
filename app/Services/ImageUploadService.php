@@ -36,11 +36,16 @@ class ImageUploadService
         // Upload the compressed raw string data directly to MinIO
         \Illuminate\Support\Facades\Storage::disk($this->disk)->put($path, $encodedImage);
 
-        return $path;
+        // Return the full URL to be saved in the database
+        return \Illuminate\Support\Facades\Storage::disk($this->disk)->url($path);
     }
 
-    public function delete(?string $path): void
+    public function delete(?string $pathOrUrl): void
     {
+        if (!$pathOrUrl) return;
+        
+        $path = $this->extractPath($pathOrUrl);
+
         if ($path && !str_starts_with($path, 'http')) {
             try {
                 Storage::disk($this->disk)->delete($path);
@@ -50,14 +55,43 @@ class ImageUploadService
         }
     }
 
-    public function url(?string $path): ?string
+    public function url(?string $pathOrUrl): ?string
     {
-        if (!$path) {
+        if (!$pathOrUrl) {
             return null;
         }
 
-        // Generate a 7-day presigned URL for private bucket access (matching Python's presigned_get_object)
+        $path = $this->extractPath($pathOrUrl);
+
+        if (str_starts_with($path, 'http')) {
+            return $path; // It's an external URL (not on our disk)
+        }
+
+        // Generate a 7-day presigned URL for private bucket access
         return Storage::disk($this->disk)->temporaryUrl($path, now()->addDays(7));
+    }
+
+    protected function extractPath(string $url): string
+    {
+        if (!str_starts_with($url, 'http')) {
+            return ltrim($url, '/');
+        }
+
+        $baseUrl = Storage::disk($this->disk)->url('');
+        
+        if (str_starts_with($url, $baseUrl)) {
+            return ltrim(substr($url, strlen($baseUrl)), '/');
+        }
+
+        // Fallback for paths with query strings or minor URL differences
+        $urlPath = parse_url($url, PHP_URL_PATH) ?? '';
+        $baseUrlPath = parse_url($baseUrl, PHP_URL_PATH) ?? '';
+        
+        if ($baseUrlPath && str_starts_with($urlPath, $baseUrlPath)) {
+            return ltrim(substr($urlPath, strlen($baseUrlPath)), '/');
+        }
+
+        return $url;
     }
 }
 

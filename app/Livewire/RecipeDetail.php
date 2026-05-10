@@ -50,10 +50,6 @@ class RecipeDetail extends Component
         $recipe = $this->recipe;
         if (!$recipe->image_url) return null;
 
-        if (str_starts_with($recipe->image_url, 'http')) {
-            return $recipe->image_url;
-        }
-
         return app(ImageUploadService::class)->url($recipe->image_url);
     }
 

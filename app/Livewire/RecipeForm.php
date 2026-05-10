@@ -346,10 +346,6 @@ class RecipeForm extends Component
             return null;
         }
 
-        if (str_starts_with($this->existingImageUrl, 'http')) {
-            return $this->existingImageUrl;
-        }
-
         return app(ImageUploadService::class)->url($this->existingImageUrl);
     }
 
