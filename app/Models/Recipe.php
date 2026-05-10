@@ -42,4 +42,13 @@ class Recipe extends Model
         return $this->belongsToMany(RecipeCategory::class, 'category_recipe')
             ->withTimestamps();
     }
+
+    protected static function booted(): void
+    {
+        static::deleted(function (Recipe $recipe) {
+            if ($recipe->image_url) {
+                app(\App\Services\ImageUploadService::class)->delete($recipe->image_url);
+            }
+        });
+    }
 }

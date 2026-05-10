@@ -29,8 +29,12 @@ class ImageUploadService
 
     public function delete(?string $path): void
     {
-        if ($path && Storage::disk($this->disk)->exists($path)) {
-            Storage::disk($this->disk)->delete($path);
+        if ($path && !str_starts_with($path, 'http')) {
+            try {
+                Storage::disk($this->disk)->delete($path);
+            } catch (\Throwable $e) {
+                // Silently ignore deletion errors (e.g. if file doesn't exist)
+            }
         }
     }
 
