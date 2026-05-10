@@ -50,7 +50,7 @@ class RecipeDetail extends Component
         $recipe = $this->recipe;
         if (!$recipe->image_url) return null;
 
-        return app(ImageUploadService::class)->url($recipe->image_url);
+        return $recipe->image_url;
     }
 
     public function render()
