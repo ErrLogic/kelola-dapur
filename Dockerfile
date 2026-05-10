@@ -62,6 +62,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
 COPY --from=builder /exts/extensions/ /usr/local/lib/php/extensions/no-debug-zts-20230831/
 COPY --from=builder /exts/conf.d/ /usr/local/etc/php/conf.d/
 
+# Increase upload limits to support image uploads
+RUN echo "upload_max_filesize = 50M\npost_max_size = 50M\nmemory_limit = 256M" > /usr/local/etc/php/conf.d/99-uploads.ini
+
 # Copy vendor and application source
 COPY --from=builder /app ./
 
