@@ -36,8 +36,8 @@ class ImageUploadService
         // Upload the compressed raw string data directly to MinIO
         \Illuminate\Support\Facades\Storage::disk($this->disk)->put($path, $encodedImage);
 
-        // Return the full URL to be saved in the database
-        return \Illuminate\Support\Facades\Storage::disk($this->disk)->url($path);
+        // Return the 7-day presigned URL to be saved in the database (matches Python project behavior)
+        return \Illuminate\Support\Facades\Storage::disk($this->disk)->temporaryUrl($path, now()->addDays(7));
     }
 
     public function delete(?string $pathOrUrl): void
