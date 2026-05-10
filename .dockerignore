@@ -21,9 +21,12 @@ coverage.xml
 .phpunit.result.cache
 phpunit.xml
 
-# Logs
-storage/logs/*.log
-storage/logs/*.json
+# Logs & Volatile Storage
+storage/logs/
+storage/framework/
+storage/app/private/
+storage/app/public/
+bootstrap/cache/
 
 # Environment files
 .env
