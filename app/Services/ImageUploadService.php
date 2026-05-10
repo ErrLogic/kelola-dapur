@@ -27,11 +27,11 @@ class ImageUploadService
         $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
         
         // Read the file, scale it down to a max width/height of 1200px (keeps aspect ratio)
-        $image = $manager->read($file->getRealPath())
+        $image = $manager->decode($file->getRealPath())
             ->scaleDown(1200, 1200);
             
         // Encode as WebP with 80% quality for optimal compression
-        $encodedImage = (string) $image->toWebp(80);
+        $encodedImage = (string) $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
 
         // Upload the compressed raw string data directly to MinIO
         \Illuminate\Support\Facades\Storage::disk($this->disk)->put($path, $encodedImage);
