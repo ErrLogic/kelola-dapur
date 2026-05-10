@@ -10,8 +10,8 @@ services:
         ports:
             - "8090:8090"
         volumes:
-            - ../../storage:/app/storage:cached
-            - ../../bootstrap/cache:/app/bootstrap/cache:cached
+            - storage:/app/storage:cached
+            - bootstrap/cache:/app/bootstrap/cache:cached
         extra_hosts:
             - "host.docker.internal:host-gateway"
         networks:
