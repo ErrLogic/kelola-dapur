@@ -21,7 +21,8 @@ class ImageUploadService
         $filename = Str::ulid() . '.' . $extension;
         
         $directory = $slug ? $this->directory . '/' . $slug : $this->directory;
-        $path = $file->storeAs($directory, $filename, ['disk' => $this->disk, 'visibility' => 'public']);
+        // Upload without public ACL since the bucket is explicitly private
+        $path = $file->storeAs($directory, $filename, $this->disk);
 
         return $path;
     }
@@ -39,7 +40,8 @@ class ImageUploadService
             return null;
         }
 
-        return Storage::disk($this->disk)->url($path);
+        // Generate a 7-day presigned URL for private bucket access (matching Python's presigned_get_object)
+        return Storage::disk($this->disk)->temporaryUrl($path, now()->addDays(7));
     }
 }
 
