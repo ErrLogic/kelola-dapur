@@ -71,7 +71,8 @@
             <div class="aspect-[16/10] bg-stone-100 overflow-hidden">
                 <img src="{{ str_starts_with($recipe->image_url, 'http') ? $recipe->image_url : $this->getImageUrl() }}"
                      alt="{{ $recipe->name }}"
-                     class="w-full h-full object-cover">
+                     class="w-full h-full object-cover"
+                     loading="lazy">
             </div>
         @endif
 
