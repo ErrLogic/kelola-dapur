@@ -21,7 +21,7 @@ class ImageUploadService
         $filename = Str::ulid() . '.' . $extension;
         
         $directory = $slug ? $this->directory . '/' . $slug : $this->directory;
-        $path = $file->storeAs($directory, $filename, $this->disk);
+        $path = $file->storeAs($directory, $filename, ['disk' => $this->disk, 'visibility' => 'public']);
 
         return $path;
     }
