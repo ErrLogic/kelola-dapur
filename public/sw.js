@@ -18,6 +18,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
+    // Only intercept requests for our own origin
+    if (url.origin !== self.location.origin) {
+        return;
+    }
+
     // Never intercept Livewire requests (component updates, file uploads, etc.)
     if (url.pathname.startsWith('/livewire')) {
         return;
@@ -36,6 +41,12 @@ self.addEventListener('fetch', (event) => {
 
     // For static assets: cache-first strategy
     event.respondWith(
-        fetch(event.request).catch(() => caches.match(event.request))
+        fetch(event.request).catch(async () => {
+            const cachedResponse = await caches.match(event.request);
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            return new Response('', { status: 404, statusText: 'Not Found' });
+        })
     );
 });

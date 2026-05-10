@@ -49,7 +49,7 @@ class RecipeForm extends Component
             'is_favorite' => ['boolean'],
             'selectedCategories' => ['array'],
             'selectedCategories.*' => ['exists:recipe_categories,id'],
-            'photo' => ['nullable', 'image', 'max:5120'],
+            'photo' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif,svg,webp,avif,heic,heif,bmp,tiff', 'max:5120'],
             'ingredientRows' => ['array', 'min:1'],
             'ingredientRows.*.ingredient_id' => ['required', 'exists:ingredients,id'],
             'ingredientRows.*.quantity' => ['nullable', 'numeric', 'min:0'],
@@ -64,7 +64,8 @@ class RecipeForm extends Component
             'name.required' => 'Nama resep harus diisi.',
             'slug.required' => 'Slug harus diisi.',
             'slug.unique' => 'Slug sudah digunakan.',
-            'photo.image' => 'File harus berupa gambar.',
+            'photo.mimes' => 'File harus berupa gambar (jpeg, png, gif, svg, webp, avif, heic, bmp, tiff).',
+            'photo.file' => 'File harus berupa gambar.',
             'photo.max' => 'Ukuran gambar maksimal 5MB.',
             'ingredientRows.min' => 'Tambahkan minimal satu bahan.',
             'ingredientRows.*.ingredient_id.required' => 'Pilih bahan terlebih dahulu.',
@@ -414,7 +415,7 @@ class RecipeForm extends Component
         $uploadService = app(ImageUploadService::class);
 
         if ($this->photo) {
-            return $uploadService->upload($this->photo, $this->existingImageUrl);
+            return $uploadService->upload($this->photo, $this->slug, $this->existingImageUrl);
         }
 
         if ($this->removeImage && $this->existingImageUrl) {

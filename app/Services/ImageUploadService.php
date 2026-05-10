@@ -11,14 +11,17 @@ class ImageUploadService
     protected string $disk = 's3';
     protected string $directory = 'recipes';
 
-    public function upload(UploadedFile $file, ?string $existingPath = null): string
+    public function upload(UploadedFile $file, ?string $slug = null, ?string $existingPath = null): string
     {
         if ($existingPath) {
             $this->delete($existingPath);
         }
 
-        $filename = Str::ulid() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs($this->directory, $filename, $this->disk);
+        $extension = $file->getClientOriginalExtension() ?: $file->extension();
+        $filename = Str::ulid() . '.' . $extension;
+        
+        $directory = $slug ? $this->directory . '/' . $slug : $this->directory;
+        $path = $file->storeAs($directory, $filename, $this->disk);
 
         return $path;
     }
