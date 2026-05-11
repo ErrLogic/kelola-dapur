@@ -146,17 +146,10 @@
             </section>
 
             <section class="panel-card space-y-4">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <p class="eyebrow">Komposisi</p>
-                        <h2 class="mt-1 text-base font-semibold text-stone-900">Bahan-bahan</h2>
-                        <p class="mt-1 text-sm leading-relaxed text-stone-500">Bangun daftar bahan secara fleksibel dengan takaran, satuan, catatan, dan urutan memasak.</p>
-                    </div>
-
-                    <button type="button" wire:click="addIngredientRow"
-                            class="inline-flex h-10 items-center justify-center rounded-2xl bg-stone-100 px-3 text-sm font-medium text-stone-700 transition active:bg-stone-200">
-                        + Tambah
-                    </button>
+                <div>
+                    <p class="eyebrow">Komposisi</p>
+                    <h2 class="mt-1 text-base font-semibold text-stone-900">Bahan-bahan</h2>
+                    <p class="mt-1 text-sm leading-relaxed text-stone-500">Bangun daftar bahan secara fleksibel dengan takaran, satuan, catatan, dan urutan memasak.</p>
                 </div>
 
                 @error('ingredientRows')<p class="field-error">{{ $message }}</p>@enderror
@@ -247,6 +240,14 @@
                         </div>
                     @endforeach
                 </div>
+
+                <button type="button" wire:click="addIngredientRow"
+                        class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-stone-300 bg-stone-50 py-3 text-sm font-medium text-stone-600 transition active:bg-stone-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Tambah bahan
+                </button>
             </section>
 
             <section class="panel-card space-y-4">

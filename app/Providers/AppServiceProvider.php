@@ -22,6 +22,12 @@ class AppServiceProvider extends ServiceProvider
     {
         if (app()->environment('production')) {
             URL::forceScheme('https');
+
+            // Ensure session cookie is scoped correctly when behind Cloudflare proxy
+            config([
+                'session.secure'    => true,
+                'session.same_site' => 'lax',
+            ]);
         }
     }
 }
