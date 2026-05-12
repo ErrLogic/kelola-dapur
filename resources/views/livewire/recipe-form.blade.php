@@ -110,8 +110,8 @@
                         @if($this->imagePreviewUrl())
                             <img src="{{ $this->imagePreviewUrl() }}"
                                  alt="Preview resep"
-                                 @load="imageLoading = false"
-                                 @error="imageLoading = false"
+                                 x-on:load="imageLoading = false"
+                                 x-on:error="imageLoading = false"
                                  class="absolute inset-0 h-full w-full object-cover">
                         @else
                             {{-- Placeholder — modern image icon, fully visible, no clipping --}}
