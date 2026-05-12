@@ -83,25 +83,29 @@
 
                 <div class="rounded-3xl border border-dashed border-stone-200 bg-stone-50/80">
 
-                    {{-- Image / placeholder area — loading overlay scoped here so it centres in the box only --}}
-                    <div class="relative">
+                    {{-- Single fixed-size box: aspect ratio never changes regardless of content --}}
+                    <div class="relative aspect-[16/10] w-full overflow-hidden rounded-t-3xl">
+
+                        {{-- Loading overlay — absolute inset-0 now has a real sized parent, always centred --}}
                         <div wire:loading wire:target="photo"
-                             class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-t-3xl bg-white/70 backdrop-blur-md">
+                             class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/75 backdrop-blur-md">
                             <div class="flex items-center gap-1.5">
                                 <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.3s]"></span>
                                 <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.15s]"></span>
                                 <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce"></span>
                             </div>
-                            <p class="text-xs font-medium tracking-wide text-stone-500 uppercase">Mengunggah…</p>
+                            <p class="text-xs font-medium tracking-wide text-stone-400 uppercase">Mengunggah…</p>
                         </div>
 
+                        {{-- Image preview — absolutely fills the same fixed box --}}
                         @if($this->imagePreviewUrl())
-                            <div class="aspect-[16/10] w-full overflow-hidden rounded-t-3xl bg-stone-100">
-                                <img src="{{ $this->imagePreviewUrl() }}" alt="Preview resep" class="h-full w-full object-cover">
-                            </div>
+                            <img src="{{ $this->imagePreviewUrl() }}"
+                                 alt="Preview resep"
+                                 class="absolute inset-0 h-full w-full object-cover">
                         @else
-                            <div class="flex min-h-56 flex-col items-center justify-center gap-3 px-6 py-10 text-center">
-                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm shadow-stone-200/60">
+                            {{-- Placeholder — also absolutely fills the box, icon centred, no overflow --}}
+                            <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
+                                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm shadow-stone-200/60">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-7 w-7 text-stone-400">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0L21.75 15.75m-10.5-6h.008v.008h-.008V9.75Zm.375-3h11.25a2.625 2.625 0 0 1 2.625 2.625v11.25a2.625 2.625 0 0 1-2.625 2.625H3.375A2.625 2.625 0 0 1 .75 20.625V9.375A2.625 2.625 0 0 1 3.375 6.75Z" />
                                     </svg>
