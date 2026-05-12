@@ -166,6 +166,14 @@
                                 @if($recipe->description)
                                     <p class="text-xs text-stone-400 mt-1 line-clamp-2 leading-relaxed">{{ $recipe->description }}</p>
                                 @endif
+                                @if($recipe->last_cooked_at)
+                                    <div class="flex items-center gap-1 mt-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 text-stone-400 shrink-0">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        <span class="text-xs text-stone-400">{{ \Carbon\Carbon::parse($recipe->last_cooked_at)->translatedFormat('d M Y') }}</span>
+                                    </div>
+                                @endif
                             </div>
 
                             {{-- Arrow --}}

@@ -27,6 +27,6 @@ class CookingSession extends Model
 
     public function cookedBy(): BelongsTo
     {
-        return $this->belongsTo(AuthorizedUser::class, 'cooked_by');
+        return $this->belongsTo(User::class, 'cooked_by');
     }
 }

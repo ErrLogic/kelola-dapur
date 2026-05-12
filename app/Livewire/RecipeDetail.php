@@ -2,8 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Models\CookingSession;
 use App\Models\Recipe;
 use App\Services\ImageUploadService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -38,6 +41,25 @@ class RecipeDetail extends Component
     }
 
     #[Computed]
+    public function activeSession(): ?CookingSession
+    {
+        return CookingSession::where('recipe_id', $this->recipeId)
+            ->whereNull('finished_at')
+            ->latest('started_at')
+            ->first();
+    }
+
+    #[Computed]
+    public function lastCookedAt(): ?Carbon
+    {
+        $max = CookingSession::where('recipe_id', $this->recipeId)
+            ->whereNotNull('finished_at')
+            ->max('finished_at');
+
+        return $max ? Carbon::parse($max) : null;
+    }
+
+    #[Computed]
     public function recipe()
     {
         return Recipe::with(['categories', 'ingredients' => function ($q) {
@@ -51,6 +73,52 @@ class RecipeDetail extends Component
         if (!$recipe->image_url) return null;
 
         return $recipe->image_url;
+    }
+
+    private function formatDuration(int $seconds): string
+    {
+        $h = intdiv($seconds, 3600);
+        $m = intdiv($seconds % 3600, 60);
+        $s = $seconds % 60;
+        return sprintf('%02d:%02d:%02d', $h, $m, $s);
+    }
+
+    public function startCooking(): void
+    {
+        if (! Auth::check()) {
+            return;
+        }
+
+        if ($this->activeSession) {
+            return; // Idempoten: tidak buat sesi baru jika sudah ada
+        }
+
+        CookingSession::create([
+            'recipe_id'  => $this->recipeId,
+            'cooked_by'  => Auth::id(),
+            'started_at' => now(),
+        ]);
+
+        unset($this->activeSession);
+    }
+
+    public function finishCooking(): void
+    {
+        $session = $this->activeSession;
+
+        if (! $session) {
+            return;
+        }
+
+        $session->update(['finished_at' => now()]);
+
+        $duration = $session->started_at->diffInSeconds(now());
+        $formatted = $this->formatDuration($duration);
+
+        $this->dispatch('toast', message: "Sesi selesai! Durasi: {$formatted}");
+
+        unset($this->activeSession);
+        unset($this->lastCookedAt);
     }
 
     public function render()

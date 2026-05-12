@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\CookingSession;
 use App\Models\Recipe;
 use App\Models\RecipeCategory;
 use Illuminate\Support\Str;
@@ -92,6 +93,12 @@ class RecipeIndex extends Component
 
         return Recipe::query()
             ->with('categories')
+            ->addSelect(['last_cooked_at' => CookingSession::select('finished_at')
+                ->whereColumn('recipe_id', 'recipes.id')
+                ->whereNotNull('finished_at')
+                ->latest('finished_at')
+                ->limit(1),
+            ])
             ->when(mb_strlen($search) >= 3, function ($query) use ($search) {
                 $query->whereRaw('LOWER(name) LIKE ?', ['%' . Str::lower($search) . '%']);
             })

@@ -168,6 +168,44 @@
                 </div>
             @endif
 
+            {{-- Cooking Session Tracker --}}
+            @if($this->activeSession)
+                <div x-data="cookingTimer({ initialSeconds: {{ now()->diffInSeconds($this->activeSession->started_at) }} })"
+                     class="bg-amber-50 border border-amber-200/60 rounded-2xl p-4 flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-medium text-amber-600 flex items-center gap-1.5">
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            Sedang memasak...
+                        </p>
+                        <p x-text="formatted" class="text-2xl font-mono font-bold text-amber-700 tabular-nums mt-0.5"></p>
+                    </div>
+                    <button wire:click="finishCooking"
+                            class="shrink-0 px-4 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-medium active:bg-amber-700 transition-colors shadow-sm">
+                        Selesai
+                    </button>
+                </div>
+            @else
+                <button wire:click="startCooking"
+                        class="w-full flex items-center justify-center gap-2 py-3 bg-amber-600 text-white rounded-xl text-sm font-medium active:bg-amber-700 transition-colors shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Mulai Memasak
+                </button>
+            @endif
+
+            {{-- Last Cooked Date --}}
+            <div class="flex items-center gap-1.5 text-xs text-stone-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                </svg>
+                @if($this->lastCookedAt)
+                    Terakhir dimasak: {{ $this->lastCookedAt->translatedFormat('d M Y') }}
+                @else
+                    Belum pernah dimasak
+                @endif
+            </div>
+
             {{-- Quick Actions --}}
             <div class="flex gap-3">
                 <a href="{{ route('recipes.edit', $recipe) }}" wire:navigate
@@ -208,3 +246,29 @@
     </div>
 </div>
 
+@script
+<script>
+    Alpine.data('cookingTimer', (config) => ({
+        seconds: config.initialSeconds,
+        interval: null,
+
+        init() {
+            this.interval = setInterval(() => {
+                this.seconds++;
+            }, 1000);
+        },
+
+        stop() {
+            clearInterval(this.interval);
+            this.interval = null;
+        },
+
+        get formatted() {
+            const h = Math.floor(this.seconds / 3600);
+            const m = Math.floor((this.seconds % 3600) / 60);
+            const s = this.seconds % 60;
+            return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+        }
+    }));
+</script>
+@endscript
