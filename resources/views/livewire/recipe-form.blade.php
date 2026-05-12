@@ -81,33 +81,52 @@
                     <p class="mt-1 text-sm leading-relaxed text-stone-500">Unggah foto untuk tampilan kartu resep dan pengalaman baca yang lebih hangat.</p>
                 </div>
 
-                <div class="rounded-3xl border border-dashed border-stone-200 bg-stone-50/80">
+                <div class="rounded-3xl border border-dashed border-stone-200 bg-stone-50/80"
+                     x-data="{
+                         uploading: false,
+                         imageLoading: {{ $this->imagePreviewUrl() ? 'true' : 'false' }},
+                     }"
+                     x-on:livewire-upload-start="uploading = true; imageLoading = true;"
+                     x-on:livewire-upload-finish="uploading = false;"
+                     x-on:livewire-upload-cancel="uploading = false; imageLoading = false;"
+                     x-on:livewire-upload-error="uploading = false; imageLoading = false;">
 
                     {{-- Single fixed-size box: aspect ratio never changes regardless of content --}}
-                    <div class="relative aspect-[16/10] w-full overflow-hidden rounded-t-3xl">
+                    <div class="relative aspect-[16/10] w-full overflow-hidden rounded-t-3xl bg-stone-100">
 
-                        {{-- Loading overlay — absolute inset-0 now has a real sized parent, always centred --}}
-                        <div wire:loading wire:target="photo"
-                             class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/75 backdrop-blur-md">
-                            <div class="flex items-center gap-1.5">
-                                <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.3s]"></span>
-                                <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.15s]"></span>
-                                <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce"></span>
+                        {{-- Unified loading overlay — modern segmented spinner, perfectly centred --}}
+                        <div x-show="uploading || imageLoading" x-cloak
+                             x-transition:leave="transition ease-out duration-200"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white/80 backdrop-blur-md">
+                            <div class="relative h-10 w-10">
+                                <span class="absolute inset-0 rounded-full border-2 border-stone-200"></span>
+                                <span class="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-stone-700 border-r-stone-700"></span>
                             </div>
-                            <p class="text-xs font-medium tracking-wide text-stone-400 uppercase">Mengunggah…</p>
+                            <p class="text-[11px] font-semibold tracking-[0.18em] text-stone-500 uppercase">Mengunggah</p>
                         </div>
 
-                        {{-- Image preview — absolutely fills the same fixed box --}}
                         @if($this->imagePreviewUrl())
                             <img src="{{ $this->imagePreviewUrl() }}"
                                  alt="Preview resep"
+                                 @load="imageLoading = false"
+                                 @error="imageLoading = false"
                                  class="absolute inset-0 h-full w-full object-cover">
                         @else
-                            {{-- Placeholder — also absolutely fills the box, icon centred, no overflow --}}
+                            {{-- Placeholder — modern image icon, fully visible, no clipping --}}
                             <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
-                                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm shadow-stone-200/60">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-7 w-7 text-stone-400">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0L21.75 15.75m-10.5-6h.008v.008h-.008V9.75Zm.375-3h11.25a2.625 2.625 0 0 1 2.625 2.625v11.25a2.625 2.625 0 0 1-2.625 2.625H3.375A2.625 2.625 0 0 1 .75 20.625V9.375A2.625 2.625 0 0 1 3.375 6.75Z" />
+                                <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm shadow-stone-200/60 ring-1 ring-stone-100">
+                                    {{-- Lucide-style "image-up" icon — clean & modern --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+                                         class="h-8 w-8 text-stone-400">
+                                        <path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5.3"/>
+                                        <path d="m3 16 5-5c.928-.893 2.072-.893 3 0l4 4"/>
+                                        <path d="m14 14 1-1c.928-.893 2.072-.893 3 0"/>
+                                        <circle cx="16" cy="8" r="1.5"/>
+                                        <path d="M19 21v-6"/>
+                                        <path d="m16 18 3-3 3 3"/>
                                     </svg>
                                 </div>
                                 <div>
