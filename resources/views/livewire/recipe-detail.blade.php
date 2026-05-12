@@ -126,56 +126,95 @@
 
         @php $recipe = $this->recipe; @endphp
 
-        {{-- Hero Image --}}
+        {{-- Hero Image with overlay metadata --}}
         @if($recipe->image_url)
             <div class="px-4 pt-4">
-                <div class="relative aspect-[16/10] overflow-hidden rounded-3xl border border-white/70 shadow-lg shadow-stone-200/60 bg-stone-100">
-                    <img src="{{ $this->getImageUrl() }}"
-                         alt="{{ $recipe->name }}"
-                         class="w-full h-full object-cover"
-                         loading="lazy">
-                    <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/45 to-transparent"></div>
-                    <div class="absolute left-3 right-3 bottom-3 flex items-end justify-between gap-3">
-                        <p class="text-white text-sm font-semibold line-clamp-2">{{ $recipe->name }}</p>
-                        @if($recipe->is_favorite)
-                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-500/90 text-white shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
-                                    <path d="M9.653 16.915l-.005-.003-.019-.01a20.759 20.759 0 01-1.162-.682 22.045 22.045 0 01-2.765-2.033C3.735 12.418 2 10.157 2 7.5c0-2.09 1.612-3.75 3.604-3.75 1.083 0 2.118.481 2.896 1.293A4.188 4.188 0 0111.396 3.75c1.992 0 3.604 1.66 3.604 3.75 0 2.657-1.735 4.918-3.702 6.687a22.045 22.045 0 01-3.928 2.715l-.019.01-.005.003h-.002a.723.723 0 01-.69 0l-.002-.001z" />
-                                </svg>
-                            </span>
+                <div class="relative overflow-hidden rounded-3xl border border-white/70 shadow-lg shadow-stone-200/60 bg-stone-900">
+                    {{-- Image (fixed aspect, blurred fallback if image is small) --}}
+                    <div class="aspect-[4/5] sm:aspect-[16/11] w-full">
+                        <img src="{{ $this->getImageUrl() }}"
+                             alt="{{ $recipe->name }}"
+                             class="w-full h-full object-cover"
+                             loading="lazy">
+                    </div>
+
+                    {{-- Saturated gradient overlay for legibility --}}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-transparent pointer-events-none"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-amber-900/30 via-transparent to-transparent mix-blend-multiply pointer-events-none"></div>
+
+                    {{-- Favorite badge (top-right corner) --}}
+                    @if($recipe->is_favorite)
+                        <span class="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/95 text-white text-[11px] font-semibold shadow-lg shadow-amber-900/30 backdrop-blur-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+                                <path d="M9.653 16.915l-.005-.003-.019-.01a20.759 20.759 0 01-1.162-.682 22.045 22.045 0 01-2.765-2.033C3.735 12.418 2 10.157 2 7.5c0-2.09 1.612-3.75 3.604-3.75 1.083 0 2.118.481 2.896 1.293A4.188 4.188 0 0111.396 3.75c1.992 0 3.604 1.66 3.604 3.75 0 2.657-1.735 4.918-3.702 6.687a22.045 22.045 0 01-3.928 2.715l-.019.01-.005.003h-.002a.723.723 0 01-.69 0l-.002-.001z" />
+                            </svg>
+                            Favorit
+                        </span>
+                    @endif
+
+                    {{-- Bottom hero content --}}
+                    <div class="absolute inset-x-0 bottom-0 p-5 space-y-2.5">
+                        @if($recipe->categories->isNotEmpty())
+                            <div class="flex flex-wrap gap-1.5">
+                                @foreach($recipe->categories as $cat)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg backdrop-blur-md text-[11px] font-semibold border border-white/20"
+                                          style="{{ $this->categoryPillStyle($cat->color) }}">{{ $cat->name }}</span>
+                                @endforeach
+                            </div>
                         @endif
+
+                        <h1 class="text-2xl font-bold text-white tracking-tight leading-tight drop-shadow-lg">{{ $recipe->name }}</h1>
+
+                        @if($recipe->description)
+                            <p class="text-sm text-white/85 leading-relaxed line-clamp-3 drop-shadow">{{ $recipe->description }}</p>
+                        @endif
+
+                        <div class="flex items-center gap-1.5 pt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-3.5 h-3.5 text-white/80 shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <span class="text-[11px] font-medium text-white/85">
+                                @if($this->lastCookedAt)
+                                    Terakhir dimasak {{ $this->lastCookedAt->translatedFormat('d M Y') }}
+                                @else
+                                    Belum pernah dimasak
+                                @endif
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         @endif
 
         <div class="px-4 py-5 space-y-6">
-            {{-- Title Section --}}
-            <div>
-                <h1 class="text-2xl font-bold text-stone-900 tracking-tight leading-tight">{{ $recipe->name }}</h1>
-                @if($recipe->description)
-                    <p class="mt-2 text-sm text-stone-500 leading-relaxed">{{ $recipe->description }}</p>
-                @endif
-                @if($recipe->categories->isNotEmpty())
-                    <div class="flex flex-wrap gap-1.5 mt-3">
-                        @foreach($recipe->categories as $cat)
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-medium"
-                                  style="{{ $this->categoryPillStyle($cat->color) }}">{{ $cat->name }}</span>
-                        @endforeach
-                    </div>
-                @endif
-                {{-- Last cooked --}}
-                <p class="mt-2 text-xs text-stone-400 flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    @if($this->lastCookedAt)
-                        Terakhir dimasak {{ $this->lastCookedAt->translatedFormat('d M Y') }}
-                    @else
-                        Belum pernah dimasak
+            {{-- Title Section — only shown as fallback when no hero image --}}
+            @unless($recipe->image_url)
+                <div>
+                    <h1 class="text-2xl font-bold text-stone-900 tracking-tight leading-tight">{{ $recipe->name }}</h1>
+                    @if($recipe->description)
+                        <p class="mt-2 text-sm text-stone-500 leading-relaxed">{{ $recipe->description }}</p>
                     @endif
-                </p>
-            </div>
+                    @if($recipe->categories->isNotEmpty())
+                        <div class="flex flex-wrap gap-1.5 mt-3">
+                            @foreach($recipe->categories as $cat)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-medium"
+                                      style="{{ $this->categoryPillStyle($cat->color) }}">{{ $cat->name }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+                    {{-- Last cooked --}}
+                    <p class="mt-2 text-xs text-stone-400 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        @if($this->lastCookedAt)
+                            Terakhir dimasak {{ $this->lastCookedAt->translatedFormat('d M Y') }}
+                        @else
+                            Belum pernah dimasak
+                        @endif
+                    </p>
+                </div>
+            @endunless
 
             {{-- Ingredients --}}
             @if($recipe->ingredients->isNotEmpty())
