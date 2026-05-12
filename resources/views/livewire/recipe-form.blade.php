@@ -110,7 +110,8 @@
 
                     <div class="flex flex-wrap gap-2 border-t border-stone-200/80 bg-white px-4 py-4">
                         <input x-ref="photoUpload" id="photo-upload" wire:model="photo" type="file" accept="image/*" class="sr-only">
-                        <button type="button" @click="openPhotoPicker()"
+                        <button type="button"
+                                onclick="const input = document.getElementById('photo-upload'); if (input) { input.value = ''; input.click(); }"
                                 class="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-stone-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-stone-900/10 transition active:scale-[0.98]">
                             {{ $this->imagePreviewUrl() ? 'Ganti foto' : 'Pilih foto' }}
                         </button>
