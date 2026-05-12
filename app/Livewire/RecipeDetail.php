@@ -87,6 +87,36 @@ class RecipeDetail extends Component
         return app(ImageUploadService::class)->url($recipe->image_url);
     }
 
+    public function categoryPillStyle(?string $color): string
+    {
+        $hex = $this->normalizeHex($color);
+        [$r, $g, $b] = $this->hexToRgb($hex);
+
+        return sprintf('background:rgba(%d,%d,%d,.20);border-color:rgba(%d,%d,%d,.35);color:%s;', $r, $g, $b, $r, $g, $b, $hex);
+    }
+
+    protected function normalizeHex(?string $color): string
+    {
+        if (! is_string($color)) {
+            return '#64748b';
+        }
+
+        $trimmed = trim($color);
+
+        return preg_match('/^#([A-Fa-f0-9]{6})$/', $trimmed) ? strtoupper($trimmed) : '#64748b';
+    }
+
+    protected function hexToRgb(string $hex): array
+    {
+        $value = ltrim($hex, '#');
+
+        return [
+            hexdec(substr($value, 0, 2)),
+            hexdec(substr($value, 2, 2)),
+            hexdec(substr($value, 4, 2)),
+        ];
+    }
+
     private function formatDuration(int $seconds): string
     {
         $h = intdiv($seconds, 3600);

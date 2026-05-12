@@ -123,7 +123,7 @@
                 @foreach($this->recipes as $recipe)
                     <div wire:key="recipe-{{ $recipe->id }}"
                          class="group relative bg-white rounded-2xl shadow-sm shadow-stone-200/50 overflow-hidden active:scale-[0.98] transition-transform duration-150">
-                        <a href="{{ route('recipes.show', ['id' => $recipe->id]) }}" wire:navigate class="flex items-stretch min-h-[6.75rem]">
+                        <a href="{{ route('recipes.show', ['id' => $recipe->id]) }}" wire:navigate class="flex h-[8.75rem] items-stretch">
                             {{-- Image --}}
                             @if($recipe->image_url)
                                 <div class="w-22 shrink-0 bg-stone-100 self-stretch">
@@ -141,7 +141,7 @@
                             @endif
 
                             {{-- Content --}}
-                            <div class="flex-1 p-3.5 flex flex-col justify-center min-w-0">
+                            <div class="flex-1 p-3.5 flex h-full flex-col justify-between min-w-0">
                                 <div class="flex items-start gap-2">
                                     <h3 class="text-sm font-semibold text-stone-800 truncate flex-1">{{ $recipe->name }}</h3>
                                     @if($recipe->is_favorite)
@@ -163,17 +163,13 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if($recipe->description)
-                                    <p class="text-xs text-stone-400 mt-1 line-clamp-2 leading-relaxed">{{ $recipe->description }}</p>
-                                @endif
-                                @if($recipe->last_cooked_at)
-                                    <div class="flex items-center gap-1 mt-1.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 text-stone-400 shrink-0">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                        </svg>
-                                        <span class="text-xs text-stone-400">{{ \Carbon\Carbon::parse($recipe->last_cooked_at)->translatedFormat('d M Y') }}</span>
-                                    </div>
-                                @endif
+                                <p class="text-xs text-stone-400 mt-1 line-clamp-2 leading-relaxed min-h-[2.5rem]">{{ $recipe->description ?? '' }}</p>
+                                <div class="flex items-center gap-1 mt-1.5 min-h-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 text-stone-400 shrink-0">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    <span class="text-xs text-stone-400">{{ $recipe->last_cooked_at ? \Carbon\Carbon::parse($recipe->last_cooked_at)->translatedFormat('d M Y') : 'Belum dimasak' }}</span>
+                                </div>
                             </div>
 
                             {{-- Arrow --}}
