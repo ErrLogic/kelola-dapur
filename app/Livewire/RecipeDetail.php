@@ -20,9 +20,21 @@ class RecipeDetail extends Component
     #[Locked]
     public string $recipeId;
 
+    public bool $isCooking = false;
+
+    public int $startedAtTs = 0;
+
     public function mount(string $id): void
     {
         $this->recipeId = $id;
+
+        $activeSession = CookingSession::where('recipe_id', $this->recipeId)
+            ->whereNull('finished_at')
+            ->latest('started_at')
+            ->first();
+
+        $this->isCooking = (bool) $activeSession;
+        $this->startedAtTs = $activeSession?->started_at?->timestamp ?? 0;
     }
 
     public function toggleFavorite(): void
@@ -101,6 +113,9 @@ class RecipeDetail extends Component
 
         unset($this->activeSession);
 
+        $this->isCooking = true;
+        $this->startedAtTs = $session->started_at->timestamp;
+
         $this->dispatch('cooking-started', startedAt: $session->started_at->timestamp);
     }
 
@@ -123,6 +138,9 @@ class RecipeDetail extends Component
 
         unset($this->activeSession);
         unset($this->lastCookedAt);
+
+        $this->isCooking = false;
+        $this->startedAtTs = 0;
     }
 
     public function render()

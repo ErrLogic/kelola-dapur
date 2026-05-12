@@ -1,18 +1,14 @@
-@php
-    $activeSession = $this->activeSession;
-    $startedAtTs   = $activeSession ? $activeSession->started_at->timestamp : 0;
-@endphp
-
 <div class="flex-1 flex flex-col"
      x-data="{
          showDeleteModal: false,
          showActions: false,
-         cooking: {{ $activeSession ? 'true' : 'false' }},
-         startedAt: {{ $startedAtTs }},
+         cooking: $wire.entangle('isCooking'),
+         startedAt: $wire.entangle('startedAtTs'),
          seconds: 0,
          ticker: null,
          startTimer() {
-             this.seconds = Math.floor(Date.now() / 1000) - this.startedAt;
+             const startedAt = Number(this.startedAt || 0);
+             this.seconds = Math.max(0, Math.floor(Date.now() / 1000) - startedAt);
              clearInterval(this.ticker);
              this.ticker = setInterval(() => { this.seconds++; }, 1000);
          },
@@ -28,11 +24,22 @@
              return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
          },
          init() {
-             if (this.cooking) this.startTimer();
+             this.$watch('cooking', (isCooking) => {
+                 if (isCooking) {
+                     this.startTimer();
+                     return;
+                 }
+
+                 this.stopTimer();
+                 this.seconds = 0;
+             });
+
+             if (this.cooking && this.startedAt) this.startTimer();
          }
      }"
-     x-on:cooking-started.window="cooking = true; startedAt = $event.detail.startedAt; startTimer();"
-     x-on:cooking-stopped.window="cooking = false; stopTimer();">
+     x-init="init()"
+     x-on:cooking-started.window="startedAt = Number($event.detail.startedAt || 0); cooking = true;"
+     x-on:cooking-stopped.window="cooking = false;">
 
     {{-- Header --}}
     <header class="sticky top-0 z-40 backdrop-blur-xl bg-stone-50/80 border-b border-stone-200/60"
