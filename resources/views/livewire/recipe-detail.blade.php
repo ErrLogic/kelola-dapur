@@ -245,34 +245,3 @@
         </div>
     </div>
 </div>
-
-@script
-<script>
-    Alpine.data('cookingTimer', (config) => ({
-        seconds: 0,
-        interval: null,
-
-        init() {
-            // Compute elapsed seconds using browser clock vs server-provided Unix timestamp
-            // This avoids any server/client timezone mismatch
-            this.seconds = Math.floor(Date.now() / 1000) - config.startedAt;
-            this.interval = setInterval(() => {
-                this.seconds++;
-            }, 1000);
-        },
-
-        stop() {
-            clearInterval(this.interval);
-            this.interval = null;
-        },
-
-        get formatted() {
-            const total = Math.max(0, Math.floor(this.seconds));
-            const h = Math.floor(total / 3600);
-            const m = Math.floor((total % 3600) / 60);
-            const s = total % 60;
-            return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
-        }
-    }));
-</script>
-@endscript
