@@ -28,7 +28,19 @@
     <form id="recipe-form" wire:submit="save" class="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 pb-28 pt-4"
           style="padding-bottom: max(env(safe-area-inset-bottom, 0px), 7rem);">
         <div class="space-y-4">
-            <section class="panel-card space-y-4">
+            <section class="panel-card space-y-4"
+                     x-data="{
+                         openPhotoPicker() {
+                             const input = this.$refs.photoUpload;
+
+                             if (! input) {
+                                 return;
+                             }
+
+                             input.value = null;
+                             input.click();
+                         }
+                     }">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <p class="eyebrow">Resep</p>
@@ -97,10 +109,11 @@
                     @endif
 
                     <div class="flex flex-wrap gap-2 border-t border-stone-200/80 bg-white px-4 py-4">
-                        <input id="photo-upload" wire:model="photo" type="file" accept="image/*" class="sr-only">
-                        <label for="photo-upload" class="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-stone-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-stone-900/10 transition active:scale-[0.98]">
+                        <input x-ref="photoUpload" id="photo-upload" wire:model="photo" type="file" accept="image/*" class="sr-only">
+                        <button type="button" @click="openPhotoPicker()"
+                                class="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-stone-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-stone-900/10 transition active:scale-[0.98]">
                             {{ $this->imagePreviewUrl() ? 'Ganti foto' : 'Pilih foto' }}
-                        </label>
+                        </button>
 
                         @if($this->imagePreviewUrl())
                             <button type="button" wire:click="removePhoto"

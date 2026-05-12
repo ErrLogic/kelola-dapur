@@ -130,7 +130,9 @@ class RecipeDetail extends Component
         $finishedAt = now();
         $session->update(['finished_at' => $finishedAt]);
 
-        $duration  = (int) abs($session->started_at->diffInSeconds($finishedAt));
+        // Keep toast duration aligned with the client timer source of truth.
+        $startedAtTs = $this->startedAtTs ?: ($session->started_at?->timestamp ?? $finishedAt->timestamp);
+        $duration = max(0, $finishedAt->timestamp - (int) $startedAtTs);
         $formatted = $this->formatDuration($duration);
 
         $this->dispatch('cooking-stopped');
