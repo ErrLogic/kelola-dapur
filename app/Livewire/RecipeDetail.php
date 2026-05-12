@@ -110,9 +110,10 @@ class RecipeDetail extends Component
             return;
         }
 
-        $session->update(['finished_at' => now()]);
+        $finishedAt = now();
+        $session->update(['finished_at' => $finishedAt]);
 
-        $duration = $session->started_at->diffInSeconds(now());
+        $duration = (int) abs($session->started_at->diffInSeconds($finishedAt));
         $formatted = $this->formatDuration($duration);
 
         $this->dispatch('toast', message: "Sesi selesai! Durasi: {$formatted}");

@@ -170,7 +170,22 @@
 
             {{-- Cooking Session Tracker --}}
             @if($this->activeSession)
-                <div x-data="cookingTimer({ startedAt: {{ $this->activeSession->started_at->timestamp }} })"
+                @php $startedAtTs = $this->activeSession->started_at->timestamp; @endphp
+                <div x-data="{
+                        seconds: 0,
+                        interval: null,
+                        init() {
+                            this.seconds = Math.floor(Date.now() / 1000) - {{ $startedAtTs }};
+                            this.interval = setInterval(() => { this.seconds++; }, 1000);
+                        },
+                        get formatted() {
+                            const t = Math.max(0, this.seconds);
+                            const h = Math.floor(t / 3600);
+                            const m = Math.floor((t % 3600) / 60);
+                            const s = t % 60;
+                            return [h,m,s].map(v => String(v).padStart(2,'0')).join(':');
+                        }
+                     }"
                      class="bg-amber-50 border border-amber-200/60 rounded-2xl p-4 flex items-center justify-between gap-4">
                     <div>
                         <p class="text-xs font-medium text-amber-600 flex items-center gap-1.5">
