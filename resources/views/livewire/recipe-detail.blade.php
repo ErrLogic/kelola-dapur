@@ -6,6 +6,26 @@
          startedAt: $wire.entangle('startedAtTs'),
          seconds: 0,
          ticker: null,
+         checkedIngredients: [],
+         checkedSteps: [],
+         toggleIngredient(i) {
+             if (! this.cooking) return;
+             const idx = this.checkedIngredients.indexOf(i);
+             if (idx === -1) this.checkedIngredients.push(i);
+             else this.checkedIngredients.splice(idx, 1);
+         },
+         toggleStep(i) {
+             if (! this.cooking) return;
+             const idx = this.checkedSteps.indexOf(i);
+             if (idx === -1) this.checkedSteps.push(i);
+             else this.checkedSteps.splice(idx, 1);
+         },
+         isIngredientChecked(i) { return this.checkedIngredients.includes(i); },
+         isStepChecked(i) { return this.checkedSteps.includes(i); },
+         resetChecks() {
+             this.checkedIngredients = [];
+             this.checkedSteps = [];
+         },
          startTimer() {
              const startedAt = Number(this.startedAt || 0);
              this.seconds = Math.max(0, Math.floor(Date.now() / 1000) - startedAt);
@@ -26,12 +46,14 @@
          init() {
              this.$watch('cooking', (isCooking) => {
                  if (isCooking) {
+                     this.resetChecks();
                      this.startTimer();
                      return;
                  }
 
                  this.stopTimer();
                  this.seconds = 0;
+                 this.resetChecks();
              });
 
              if (this.cooking && this.startedAt) this.startTimer();
@@ -228,15 +250,31 @@
                             </div>
                             <h2 class="text-sm font-semibold text-stone-800">Bahan-bahan</h2>
                             <span class="text-xs text-stone-400">{{ $recipe->ingredients->count() }} item</span>
+                            <span class="ml-auto text-[10px] font-semibold uppercase tracking-wide text-amber-600" x-show="cooking" x-cloak>Tap untuk tandai</span>
                         </div>
                     </div>
                     <div class="divide-y divide-stone-50">
                         @foreach($recipe->ingredients as $ingredient)
-                            <div class="px-4 py-3 flex items-start gap-3">
-                                <div class="w-5 h-5 mt-0.5 rounded-full border-2 border-stone-200 shrink-0 flex items-center justify-center">
-                                    <span class="text-[9px] text-stone-400 font-medium">{{ $loop->iteration }}</span>
+                            @php $iIndex = $loop->index; @endphp
+                            <div class="px-4 py-3 flex items-start gap-3 transition-colors"
+                                 :class="cooking ? 'cursor-pointer active:bg-stone-50' : ''"
+                                 @click="toggleIngredient({{ $iIndex }})">
+                                {{-- Number / Checkmark indicator --}}
+                                <div class="w-6 h-6 mt-0.5 rounded-full shrink-0 flex items-center justify-center transition-all border-2"
+                                     :class="cooking && isIngredientChecked({{ $iIndex }})
+                                         ? 'bg-amber-500 border-amber-500'
+                                         : 'border-stone-200'">
+                                    <template x-if="!(cooking && isIngredientChecked({{ $iIndex }}))">
+                                        <span class="text-[10px] text-stone-400 font-medium">{{ $loop->iteration }}</span>
+                                    </template>
+                                    <template x-if="cooking && isIngredientChecked({{ $iIndex }})">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-3.5 h-3.5 text-white">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </template>
                                 </div>
-                                <div class="flex-1 min-w-0">
+                                <div class="flex-1 min-w-0 transition-all"
+                                     :class="cooking && isIngredientChecked({{ $iIndex }}) ? 'opacity-40 line-through' : ''">
                                     <div class="flex items-baseline gap-1.5 flex-wrap">
                                         <span class="text-sm font-medium text-stone-700">{{ $ingredient->name }}</span>
                                         @if($ingredient->pivot->quantity || $ingredient->pivot->unit_id)
@@ -267,21 +305,38 @@
                                 </svg>
                             </div>
                             <h2 class="text-sm font-semibold text-stone-800">Langkah Memasak</h2>
+                            <span class="ml-auto text-[10px] font-semibold uppercase tracking-wide text-emerald-600" x-show="cooking" x-cloak>Tap untuk tandai</span>
                         </div>
                     </div>
                     <div class="px-4 pb-4">
-                        @php $steps = preg_split('/\n/', $recipe->instructions); @endphp
+                        @php
+                            $steps = collect(preg_split('/\n/', $recipe->instructions))
+                                ->map(fn ($s) => trim($s))
+                                ->filter()
+                                ->values();
+                        @endphp
                         <div class="space-y-3 mt-1">
-                            @foreach($steps as $step)
-                                @if(trim($step))
-                                    @php $cleanStep = preg_replace('/^\d+[\.\)]\s*/', '', trim($step)); @endphp
-                                    <div class="flex gap-3">
-                                        <div class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
-                                            {{ $loop->iteration }}
-                                        </div>
-                                        <p class="text-sm text-stone-600 leading-relaxed flex-1">{{ $cleanStep }}</p>
+                            @foreach($steps as $stepIndex => $step)
+                                @php $cleanStep = preg_replace('/^\d+[\.\)]\s*/', '', $step); @endphp
+                                <div class="flex gap-3 transition-colors rounded-lg -mx-2 px-2 py-1"
+                                     :class="cooking ? 'cursor-pointer active:bg-emerald-50/60' : ''"
+                                     @click="toggleStep({{ $stepIndex }})">
+                                    <div class="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5 transition-all"
+                                         :class="cooking && isStepChecked({{ $stepIndex }})
+                                             ? 'bg-emerald-500 text-white'
+                                             : 'bg-emerald-50 text-emerald-600'">
+                                        <template x-if="!(cooking && isStepChecked({{ $stepIndex }}))">
+                                            <span>{{ $stepIndex + 1 }}</span>
+                                        </template>
+                                        <template x-if="cooking && isStepChecked({{ $stepIndex }})">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-3.5 h-3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                        </template>
                                     </div>
-                                @endif
+                                    <p class="text-sm text-stone-600 leading-relaxed flex-1 transition-all"
+                                       :class="cooking && isStepChecked({{ $stepIndex }}) ? 'opacity-40 line-through' : ''">{{ $cleanStep }}</p>
+                                </div>
                             @endforeach
                         </div>
                     </div>
