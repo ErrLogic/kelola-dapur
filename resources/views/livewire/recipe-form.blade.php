@@ -81,17 +81,20 @@
                     <p class="mt-1 text-sm leading-relaxed text-stone-500">Unggah foto untuk tampilan kartu resep dan pengalaman baca yang lebih hangat.</p>
                 </div>
 
-                <div class="relative overflow-hidden rounded-3xl border border-dashed border-stone-200 bg-stone-50/80">
-                    <div wire:loading wire:target="photo" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-stone-50/90 backdrop-blur-sm">
-                        <svg class="h-8 w-8 animate-spin text-stone-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <p class="mt-3 text-sm font-medium text-stone-700">Mengunggah...</p>
+                <div class="relative rounded-3xl border border-dashed border-stone-200 bg-stone-50/80">
+                    <div wire:loading wire:target="photo"
+                         class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-3xl bg-white/70 backdrop-blur-md">
+                        {{-- Animated dots --}}
+                        <div class="flex items-center gap-1.5">
+                            <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.3s]"></span>
+                            <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.15s]"></span>
+                            <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce"></span>
+                        </div>
+                        <p class="text-xs font-medium tracking-wide text-stone-500 uppercase">Mengunggah…</p>
                     </div>
 
                     @if($this->imagePreviewUrl())
-                        <div class="aspect-[16/10] w-full overflow-hidden bg-stone-100">
+                        <div class="aspect-[16/10] w-full overflow-hidden rounded-t-3xl bg-stone-100">
                             <img src="{{ $this->imagePreviewUrl() }}" alt="Preview resep" class="h-full w-full object-cover">
                         </div>
                     @else
