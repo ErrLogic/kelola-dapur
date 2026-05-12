@@ -84,7 +84,7 @@ class RecipeDetail extends Component
         $recipe = $this->recipe;
         if (!$recipe->image_url) return null;
 
-        return $recipe->image_url;
+        return app(ImageUploadService::class)->url($recipe->image_url);
     }
 
     private function formatDuration(int $seconds): string

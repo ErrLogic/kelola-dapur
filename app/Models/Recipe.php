@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Recipe extends Model
 {
@@ -18,6 +19,19 @@ class Recipe extends Model
     protected $casts = [
         'is_favorite' => 'boolean',
     ];
+
+    /**
+     * Fresh, signed URL for the stored image object key.
+     * Always go through ImageUploadService so presigned URLs never get double-signed.
+     */
+    protected function signedImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->image_url
+                ? app(\App\Services\ImageUploadService::class)->url($this->image_url)
+                : null,
+        );
+    }
 
     public function ingredients(): BelongsToMany
     {

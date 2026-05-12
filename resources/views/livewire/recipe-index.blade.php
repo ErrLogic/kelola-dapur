@@ -127,7 +127,7 @@
                             {{-- Image --}}
                             @if($recipe->image_url)
                                 <div class="w-22 shrink-0 bg-stone-100 self-stretch">
-                                    <img src="{{ $recipe->image_url }}"
+                                    <img src="{{ $recipe->signed_image_url }}"
                                          alt="{{ $recipe->name }}"
                                          class="w-full h-full object-cover"
                                          loading="lazy">
