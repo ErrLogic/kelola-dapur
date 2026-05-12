@@ -170,7 +170,7 @@
 
             {{-- Cooking Session Tracker --}}
             @if($this->activeSession)
-                <div x-data="cookingTimer({ initialSeconds: {{ now()->diffInSeconds($this->activeSession->started_at) }} })"
+                <div x-data="cookingTimer({ initialSeconds: {{ (int) now()->diffInSeconds($this->activeSession->started_at) }} })"
                      class="bg-amber-50 border border-amber-200/60 rounded-2xl p-4 flex items-center justify-between gap-4">
                     <div>
                         <p class="text-xs font-medium text-amber-600 flex items-center gap-1.5">
@@ -253,6 +253,7 @@
         interval: null,
 
         init() {
+            this.seconds = Math.floor(config.initialSeconds);
             this.interval = setInterval(() => {
                 this.seconds++;
             }, 1000);
@@ -264,9 +265,10 @@
         },
 
         get formatted() {
-            const h = Math.floor(this.seconds / 3600);
-            const m = Math.floor((this.seconds % 3600) / 60);
-            const s = this.seconds % 60;
+            const total = Math.floor(this.seconds);
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const s = total % 60;
             return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
         }
     }));
