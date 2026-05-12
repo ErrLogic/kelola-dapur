@@ -90,16 +90,18 @@ class RecipeDetail extends Component
         }
 
         if ($this->activeSession) {
-            return; // Idempoten: tidak buat sesi baru jika sudah ada
+            return;
         }
 
-        CookingSession::create([
+        $session = CookingSession::create([
             'recipe_id'  => $this->recipeId,
             'cooked_by'  => Auth::id(),
             'started_at' => now(),
         ]);
 
         unset($this->activeSession);
+
+        $this->dispatch('cooking-started', startedAt: $session->started_at->timestamp);
     }
 
     public function finishCooking(): void
@@ -113,9 +115,10 @@ class RecipeDetail extends Component
         $finishedAt = now();
         $session->update(['finished_at' => $finishedAt]);
 
-        $duration = (int) abs($session->started_at->diffInSeconds($finishedAt));
+        $duration  = (int) abs($session->started_at->diffInSeconds($finishedAt));
         $formatted = $this->formatDuration($duration);
 
+        $this->dispatch('cooking-stopped');
         $this->dispatch('toast', message: "Sesi selesai! Durasi: {$formatted}");
 
         unset($this->activeSession);

@@ -1,5 +1,38 @@
+@php
+    $activeSession = $this->activeSession;
+    $startedAtTs   = $activeSession ? $activeSession->started_at->timestamp : 0;
+@endphp
+
 <div class="flex-1 flex flex-col"
-     x-data="{ showDeleteModal: false, showActions: false }">
+     x-data="{
+         showDeleteModal: false,
+         showActions: false,
+         cooking: {{ $activeSession ? 'true' : 'false' }},
+         startedAt: {{ $startedAtTs }},
+         seconds: 0,
+         ticker: null,
+         startTimer() {
+             this.seconds = Math.floor(Date.now() / 1000) - this.startedAt;
+             clearInterval(this.ticker);
+             this.ticker = setInterval(() => { this.seconds++; }, 1000);
+         },
+         stopTimer() {
+             clearInterval(this.ticker);
+             this.ticker = null;
+         },
+         get elapsed() {
+             const t = Math.max(0, this.seconds);
+             const h = Math.floor(t / 3600);
+             const m = Math.floor((t % 3600) / 60);
+             const s = t % 60;
+             return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+         },
+         init() {
+             if (this.cooking) this.startTimer();
+         }
+     }"
+     x-on:cooking-started.window="cooking = true; startedAt = $event.detail.startedAt; startTimer();"
+     x-on:cooking-stopped.window="cooking = false; stopTimer();">
 
     {{-- Header --}}
     <header class="sticky top-0 z-40 backdrop-blur-xl bg-stone-50/80 border-b border-stone-200/60"
@@ -13,6 +46,25 @@
                 Kembali
             </a>
             <div class="flex items-center gap-2">
+
+                {{-- Cooking timer / start button in header --}}
+                <template x-if="cooking">
+                    <button wire:click="finishCooking"
+                            class="inline-flex items-center gap-1.5 px-3 h-10 rounded-xl bg-amber-500 text-white text-xs font-semibold active:bg-amber-600 transition-colors">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-white animate-pulse shrink-0"></span>
+                        <span wire:ignore x-text="elapsed" class="font-mono tabular-nums"></span>
+                    </button>
+                </template>
+                <template x-if="!cooking">
+                    <button wire:click="startCooking"
+                            class="inline-flex items-center gap-1.5 px-3 h-10 rounded-xl bg-amber-100 text-amber-700 text-xs font-semibold active:bg-amber-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        Masak
+                    </button>
+                </template>
+
                 <button wire:click="toggleFavorite"
                         class="inline-flex items-center justify-center w-10 h-10 rounded-xl transition-colors {{ $this->recipe->is_favorite ? 'bg-amber-50 text-amber-500' : 'bg-stone-100 text-stone-400' }} active:scale-95">
                     @if($this->recipe->is_favorite)
@@ -25,6 +77,7 @@
                         </svg>
                     @endif
                 </button>
+
                 <div class="relative">
                     <button @click="showActions = !showActions"
                             class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-stone-100 text-stone-500 active:bg-stone-200 transition-colors">
@@ -90,6 +143,17 @@
                         @endforeach
                     </div>
                 @endif
+                {{-- Last cooked --}}
+                <p class="mt-2 text-xs text-stone-400 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    @if($this->lastCookedAt)
+                        Terakhir dimasak {{ $this->lastCookedAt->translatedFormat('d M Y') }}
+                    @else
+                        Belum pernah dimasak
+                    @endif
+                </p>
             </div>
 
             {{-- Ingredients --}}
@@ -146,15 +210,11 @@
                         </div>
                     </div>
                     <div class="px-4 pb-4">
-                        @php
-                            $steps = preg_split('/\n/', $recipe->instructions);
-                        @endphp
+                        @php $steps = preg_split('/\n/', $recipe->instructions); @endphp
                         <div class="space-y-3 mt-1">
                             @foreach($steps as $step)
                                 @if(trim($step))
-                                    @php
-                                        $cleanStep = preg_replace('/^\d+[\.\)]\s*/', '', trim($step));
-                                    @endphp
+                                    @php $cleanStep = preg_replace('/^\d+[\.\)]\s*/', '', trim($step)); @endphp
                                     <div class="flex gap-3">
                                         <div class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
                                             {{ $loop->iteration }}
@@ -168,60 +228,7 @@
                 </div>
             @endif
 
-            {{-- Cooking Session Tracker --}}
-            @if($this->activeSession)
-                @php $startedAtTs = $this->activeSession->started_at->timestamp; @endphp
-                <div x-data="{
-                        seconds: 0,
-                        interval: null,
-                        init() {
-                            this.seconds = Math.floor(Date.now() / 1000) - {{ $startedAtTs }};
-                            this.interval = setInterval(() => { this.seconds++; }, 1000);
-                        },
-                        get formatted() {
-                            const t = Math.max(0, this.seconds);
-                            const h = Math.floor(t / 3600);
-                            const m = Math.floor((t % 3600) / 60);
-                            const s = t % 60;
-                            return [h,m,s].map(v => String(v).padStart(2,'0')).join(':');
-                        }
-                     }"
-                     class="bg-amber-50 border border-amber-200/60 rounded-2xl p-4 flex items-center justify-between gap-4">
-                    <div>
-                        <p class="text-xs font-medium text-amber-600 flex items-center gap-1.5">
-                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                            Sedang memasak...
-                        </p>
-                        <p x-text="formatted" class="text-2xl font-mono font-bold text-amber-700 tabular-nums mt-0.5"></p>
-                    </div>
-                    <button wire:click="finishCooking"
-                            class="shrink-0 px-4 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-medium active:bg-amber-700 transition-colors shadow-sm">
-                        Selesai
-                    </button>
-                </div>
-            @else
-                <button wire:click="startCooking"
-                        class="w-full flex items-center justify-center gap-2 py-3 bg-amber-600 text-white rounded-xl text-sm font-medium active:bg-amber-700 transition-colors shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    Mulai Memasak
-                </button>
-            @endif
-
-            {{-- Last Cooked Date --}}
-            <div class="flex items-center gap-1.5 text-xs text-stone-400">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                </svg>
-                @if($this->lastCookedAt)
-                    Terakhir dimasak: {{ $this->lastCookedAt->translatedFormat('d M Y') }}
-                @else
-                    Belum pernah dimasak
-                @endif
-            </div>
-
-            {{-- Quick Actions --}}
+            {{-- Edit button --}}
             <div class="flex gap-3">
                 <a href="{{ route('recipes.edit', $recipe) }}" wire:navigate
                    class="flex-1 flex items-center justify-center gap-2 py-3 bg-stone-800 text-white rounded-xl text-sm font-medium active:bg-stone-900 transition-colors shadow-sm">
