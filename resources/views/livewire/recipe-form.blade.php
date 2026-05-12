@@ -81,37 +81,40 @@
                     <p class="mt-1 text-sm leading-relaxed text-stone-500">Unggah foto untuk tampilan kartu resep dan pengalaman baca yang lebih hangat.</p>
                 </div>
 
-                <div class="relative rounded-3xl border border-dashed border-stone-200 bg-stone-50/80">
-                    <div wire:loading wire:target="photo"
-                         class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-3xl bg-white/70 backdrop-blur-md">
-                        {{-- Animated dots --}}
-                        <div class="flex items-center gap-1.5">
-                            <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.3s]"></span>
-                            <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.15s]"></span>
-                            <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce"></span>
+                <div class="rounded-3xl border border-dashed border-stone-200 bg-stone-50/80">
+
+                    {{-- Image / placeholder area — loading overlay scoped here so it centres in the box only --}}
+                    <div class="relative">
+                        <div wire:loading wire:target="photo"
+                             class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-t-3xl bg-white/70 backdrop-blur-md">
+                            <div class="flex items-center gap-1.5">
+                                <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.3s]"></span>
+                                <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce [animation-delay:-0.15s]"></span>
+                                <span class="h-2 w-2 rounded-full bg-stone-400 animate-bounce"></span>
+                            </div>
+                            <p class="text-xs font-medium tracking-wide text-stone-500 uppercase">Mengunggah…</p>
                         </div>
-                        <p class="text-xs font-medium tracking-wide text-stone-500 uppercase">Mengunggah…</p>
+
+                        @if($this->imagePreviewUrl())
+                            <div class="aspect-[16/10] w-full overflow-hidden rounded-t-3xl bg-stone-100">
+                                <img src="{{ $this->imagePreviewUrl() }}" alt="Preview resep" class="h-full w-full object-cover">
+                            </div>
+                        @else
+                            <div class="flex min-h-56 flex-col items-center justify-center gap-3 px-6 py-10 text-center">
+                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm shadow-stone-200/60">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-7 w-7 text-stone-400">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0L21.75 15.75m-10.5-6h.008v.008h-.008V9.75Zm.375-3h11.25a2.625 2.625 0 0 1 2.625 2.625v11.25a2.625 2.625 0 0 1-2.625 2.625H3.375A2.625 2.625 0 0 1 .75 20.625V9.375A2.625 2.625 0 0 1 3.375 6.75Z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-stone-700">Belum ada gambar</p>
+                                    <p class="mt-1 text-xs text-stone-400">Gunakan foto vertikal atau landscape ringan hingga 5MB.</p>
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
-                    @if($this->imagePreviewUrl())
-                        <div class="aspect-[16/10] w-full overflow-hidden rounded-t-3xl bg-stone-100">
-                            <img src="{{ $this->imagePreviewUrl() }}" alt="Preview resep" class="h-full w-full object-cover">
-                        </div>
-                    @else
-                        <div class="flex aspect-[16/10] flex-col items-center justify-center gap-3 px-6 text-center">
-                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm shadow-stone-200/60">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-7 w-7 text-stone-400">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0L21.75 15.75m-10.5-6h.008v.008h-.008V9.75Zm.375-3h11.25a2.625 2.625 0 0 1 2.625 2.625v11.25a2.625 2.625 0 0 1-2.625 2.625H3.375A2.625 2.625 0 0 1 .75 20.625V9.375A2.625 2.625 0 0 1 3.375 6.75Z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-stone-700">Belum ada gambar</p>
-                                <p class="mt-1 text-xs text-stone-400">Gunakan foto vertikal atau landscape ringan hingga 5MB.</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    <div class="flex flex-wrap gap-2 border-t border-stone-200/80 bg-white px-4 py-4">
+                    <div class="flex flex-wrap gap-2 border-t border-stone-200/80 bg-white px-4 py-4 rounded-b-3xl">
                         <input x-ref="photoUpload" id="photo-upload" wire:model="photo" type="file" accept="image/*" class="sr-only">
                         <button type="button"
                                 @click="$refs.photoUpload.value = null; $refs.photoUpload.click()"
